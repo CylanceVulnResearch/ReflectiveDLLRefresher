@@ -8,6 +8,8 @@
 ## UPX
 The packaged UPX binaries have been modified to support an additional parameter (`-X <path/to/target.dll>`) to embed into the packed binary.  The final UPX packed binary will unpack the target executable in memory and call the embedded DLL before jumping into the executable's original entry point.
 
+The modified UPX source can be found @ https://github.com/CylanceVulnResearch/upx/tree/reflective_dll
+
 Usage:
 ```
 upx -o <output filename> -X <path/to/embed.dll> <target executable>
