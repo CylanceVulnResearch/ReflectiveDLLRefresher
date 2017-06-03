@@ -306,6 +306,18 @@ HMODULE GetLoadedLibrary(const PCHAR szModule)
     return LoadLibraryA(szModule);
 }
 
+int aoti_(const char *str)
+{
+    if (!str)
+        return 0;
+
+    int res = 0;
+    for (char *curPtr = (char *) str; *curPtr != 0; curPtr++)
+        res = res * 10 + *curPtr - '0';
+
+    return res;
+}
+
 FARPROC WINAPI CustomGetProcAddressEx(HMODULE hModule, const PCHAR lpProcName, const PCHAR szOriginalModule)
 {
     UINT_PTR uiLibraryAddress = 0;
@@ -395,7 +407,13 @@ FARPROC WINAPI CustomGetProcAddressEx(HMODULE hModule, const PCHAR lpProcName, c
                     }
 
                     hFwdModule = GetLoadedLibrary(szRedirModule);
-                    fpResult = CustomGetProcAddressEx(hFwdModule, szRedirFunc, szRedirModule);
+                    if (szRedirFunc)
+                    {
+                        if (szRedirFunc[0] == '#')
+                            fpResult = CustomGetProcAddressEx(hFwdModule, (PCHAR) atoi_(szRedirFunc + 1), szRedirModule);
+                        else
+                            fpResult = CustomGetProcAddressEx(hFwdModule, szRedirFunc, szRedirModule);
+                    }
                     free_(szRedirModule);
                     free_(szRedirFunc);
                     return fpResult;
