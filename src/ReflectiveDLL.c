@@ -23,9 +23,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpReserved)
         break;
     case DLL_PROCESS_ATTACH:
         hAppInstance = hinstDLL;
-        ResolveImports();
         RefreshPE();
-        FreeImports();
         break;
     case DLL_PROCESS_DETACH:
     case DLL_THREAD_ATTACH:

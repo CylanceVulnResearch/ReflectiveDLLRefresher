@@ -29,15 +29,10 @@
 *                                                                                    *
 *************************************************************************************/
 
-#include "imports.h"
 #include "loader.h"
 
 int main()
 {
-	ResolveImports();
 	RefreshPE();
-	FreeImports();
-	OUTPUTDBGA("[+] Done.\n");
-
 	return 0;
 }

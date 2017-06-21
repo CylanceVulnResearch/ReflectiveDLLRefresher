@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\ApiSetMap.h">
+    <ClInclude Include="..\src\apisetmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\loader.h">
@@ -27,12 +27,9 @@
     <ClInclude Include="..\src\ReflectiveLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\imports.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\ApiSetMap.c">
+    <ClCompile Include="..\src\apisetmap.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\loader.c">
@@ -42,9 +39,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ReflectiveLoader.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\imports.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

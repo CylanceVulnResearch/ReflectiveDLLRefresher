@@ -30,11 +30,12 @@
 *************************************************************************************/
 
 #pragma once
+#ifndef _APISETMAP_H_
+#define _APISETMAP_H_
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "ReflectiveLoader.h"
-#include "imports.h"
 
 _PPEB GetProcessEnvironmentBlock();
 PLDR_DATA_TABLE_ENTRY GetInMemoryOrderModuleList();
@@ -142,7 +143,9 @@ typedef struct _API_SET_NAMESPACE_ARRAY_V2
     API_SET_NAMESPACE_ENTRY_V2 Array[ANYSIZE_ARRAY];
 } API_SET_NAMESPACE_ARRAY_V2, *PAPI_SET_NAMESPACE_ARRAY_V2;
 
-PCHAR GetRedirectedName(PCHAR szOriginalModule, PCHAR szRedirectedModule);
-PCHAR GetRedirectedName_V6(PCHAR szOriginalModule, PCHAR szRedirectedModule);
-PCHAR GetRedirectedName_V4(PCHAR szOriginalModule, PCHAR szRedirectedModule);
-PCHAR GetRedirectedName_V2(PCHAR szOriginalModule, PCHAR szRedirectedModule);
+PWCHAR GetRedirectedName(const PWSTR wszImportingModule, const PWSTR wszVirtualModule, SIZE_T* stSize);
+PWCHAR GetRedirectedName_V6(const PWSTR wszImportingModule, const PWSTR wszVirtualModule, SIZE_T* stSize);
+PWCHAR GetRedirectedName_V4(const PWSTR wszImportingModule, const PWSTR wszVirtualModule, SIZE_T* stSize);
+PWCHAR GetRedirectedName_V2(const PWSTR wszImportingModule, const PWSTR wszVirtualModule, SIZE_T* stSize);
+
+#endif // _APISETMAP_H_
