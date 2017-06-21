@@ -55,15 +55,15 @@ PWCHAR GetRedirectedName(const PWSTR wszImportingModule, const PWSTR wszVirtualM
 {
     PAPI_SET_NAMESPACE_ARRAY_V2 pApiSetMap;
     pApiSetMap = (PAPI_SET_NAMESPACE_ARRAY_V2)GetProcessEnvironmentBlock()->lpApiSetMap;
-	*stSize = 0;
+    *stSize = 0;
 
-	if (pApiSetMap->Version == 6)
-		return GetRedirectedName_V6(wszImportingModule, wszVirtualModule, stSize);
-	else if (pApiSetMap->Version == 4)
-		return GetRedirectedName_V4(wszImportingModule, wszVirtualModule, stSize);
-	else if (pApiSetMap->Version == 2)
-		return GetRedirectedName_V2(wszImportingModule, wszVirtualModule, stSize);
-	else
+    if (pApiSetMap->Version == 6)
+        return GetRedirectedName_V6(wszImportingModule, wszVirtualModule, stSize);
+    else if (pApiSetMap->Version == 4)
+        return GetRedirectedName_V4(wszImportingModule, wszVirtualModule, stSize);
+    else if (pApiSetMap->Version == 2)
+        return GetRedirectedName_V2(wszImportingModule, wszVirtualModule, stSize);
+    else
         return NULL;
 }
 
@@ -72,12 +72,12 @@ PWCHAR GetRedirectedName_V6(const PWSTR wszImportingModule, const PWSTR wszVirtu
     PAPI_SET_NAMESPACE_ARRAY_V6 pApiSetMap;
     PAPI_SET_NAMESPACE_ENTRY_V6 pApiEntry;
     PAPI_SET_VALUE_ENTRY_V6 pApiValue;
-	PAPI_SET_VALUE_ENTRY_V6 pApiArray;
+    PAPI_SET_VALUE_ENTRY_V6 pApiArray;
     DWORD dwEntryCount;
     DWORD dwSetCount;
-	PWSTR wsEntry;
-	PWSTR wsName;
-	PWSTR wsValue;
+    PWSTR wsEntry;
+    PWSTR wsName;
+    PWSTR wsValue;
 
     pApiSetMap = (PAPI_SET_NAMESPACE_ARRAY_V6)GetProcessEnvironmentBlock()->lpApiSetMap;
 
@@ -85,27 +85,27 @@ PWCHAR GetRedirectedName_V6(const PWSTR wszImportingModule, const PWSTR wszVirtu
     for (dwEntryCount = 0; dwEntryCount < pApiSetMap->Count; dwEntryCount++)
     {
         pApiEntry = &pApiSetMap->Array[dwEntryCount];
-		wsEntry = (PWSTR)((PCHAR)pApiSetMap + pApiEntry->NameOffset);
+        wsEntry = (PWSTR)((PCHAR)pApiSetMap + pApiEntry->NameOffset);
 
         // Skip this entry if it does not match
-		if (_wcsnicmp(wsEntry, wszVirtualModule, pApiEntry->NameLength / 2) != 0)
-			continue;
+        if (_wcsnicmp(wsEntry, wszVirtualModule, pApiEntry->NameLength / 2) != 0)
+            continue;
 
-		pApiArray = (PAPI_SET_VALUE_ENTRY_V6)((PCHAR)pApiSetMap + pApiEntry->DataOffset);
+        pApiArray = (PAPI_SET_VALUE_ENTRY_V6)((PCHAR)pApiSetMap + pApiEntry->DataOffset);
 
-		// Loop through each value entry from the end and find where the importing module matches the ``Name`` entry
-		// If the ``Name`` entry is empty, it is the default entry @ index = 0
+        // Loop through each value entry from the end and find where the importing module matches the ``Name`` entry
+        // If the ``Name`` entry is empty, it is the default entry @ index = 0
         for (dwSetCount = pApiEntry->Count-1; dwSetCount >= 0; dwSetCount--)
         {
            // pApiValue = (PAPI_SET_VALUE_ENTRY_V6)((PCHAR)pApiSetMap + pApiEntry->DataOffset + (dwSetCount * sizeof(API_SET_VALUE_ENTRY_V6)));
-			pApiValue = &pApiArray[dwSetCount];
-			wsName = (PWSTR)((PCHAR)pApiSetMap + pApiValue->NameOffset);
-			wsValue = (PWSTR)((PCHAR)pApiSetMap + pApiValue->ValueOffset);
+            pApiValue = &pApiArray[dwSetCount];
+            wsName = (PWSTR)((PCHAR)pApiSetMap + pApiValue->NameOffset);
+            wsValue = (PWSTR)((PCHAR)pApiSetMap + pApiValue->ValueOffset);
 
             if (pApiValue->NameLength == 0 || _wcsnicmp(wsName, wszImportingModule, pApiValue->NameLength / 2) == 0)
             {
                 *stSize = pApiValue->ValueLength / 2;
-				return wsValue;
+                return wsValue;
             }
         }
     }
@@ -121,33 +121,33 @@ PWCHAR GetRedirectedName_V4(const PWSTR wszImportingModule, const PWSTR wszVirtu
     PAPI_SET_VALUE_ENTRY_V4 pApiValue;
     DWORD dwEntryCount;
     DWORD dwSetCount;
-	PWSTR wsEntry;
-	PWSTR wsName;
-	PWSTR wsValue;
+    PWSTR wsEntry;
+    PWSTR wsName;
+    PWSTR wsValue;
 
 
     pApiSetMap = (PAPI_SET_NAMESPACE_ARRAY_V4)GetProcessEnvironmentBlock()->lpApiSetMap;
     for (dwEntryCount = 0; dwEntryCount < pApiSetMap->Count; dwEntryCount++)
     {
-		pApiEntry = &pApiSetMap->Array[dwEntryCount];
-		wsEntry = (PWSTR)((PCHAR)pApiSetMap + pApiEntry->NameOffset);
+        pApiEntry = &pApiSetMap->Array[dwEntryCount];
+        wsEntry = (PWSTR)((PCHAR)pApiSetMap + pApiEntry->NameOffset);
 
-		if (_wcsnicmp(wsEntry, wszVirtualModule, pApiEntry->NameLength / 2) != 0)
-			continue;
+        if (_wcsnicmp(wsEntry, wszVirtualModule, pApiEntry->NameLength / 2) != 0)
+            continue;
 
         pApiArray = (PAPI_SET_VALUE_ARRAY_V4)((PCHAR)pApiSetMap + pApiEntry->DataOffset);
 
         for (dwSetCount = pApiArray->Count-1; dwSetCount >= 0; dwSetCount--)
         {
             pApiValue = &pApiArray->Array[dwSetCount];
-			wsName = (PWSTR)((PCHAR)pApiSetMap + pApiValue->NameOffset);
-			wsValue = (PWSTR)((PCHAR)pApiSetMap + pApiValue->ValueOffset);
+            wsName = (PWSTR)((PCHAR)pApiSetMap + pApiValue->NameOffset);
+            wsValue = (PWSTR)((PCHAR)pApiSetMap + pApiValue->ValueOffset);
 
-			if (pApiValue->NameLength == 0 || _wcsnicmp(wsName, wszImportingModule, pApiValue->NameLength / 2) == 0)
+            if (pApiValue->NameLength == 0 || _wcsnicmp(wsName, wszImportingModule, pApiValue->NameLength / 2) == 0)
             {
-				*stSize = pApiValue->ValueLength / 2;
-				return wsValue;
-			}
+                *stSize = pApiValue->ValueLength / 2;
+                return wsValue;
+            }
         }
     }
     return NULL;
@@ -161,34 +161,34 @@ PWCHAR GetRedirectedName_V2(const PWSTR wszImportingModule, const PWSTR wszVirtu
     PAPI_SET_VALUE_ENTRY_V2 pApiValue;
     DWORD dwEntryCount;
     DWORD dwSetCount;
-	PWSTR wsEntry;
-	PWSTR wsName;
-	PWSTR wsValue;
+    PWSTR wsEntry;
+    PWSTR wsName;
+    PWSTR wsValue;
 
 
     pApiSetMap = (PAPI_SET_NAMESPACE_ARRAY_V2)GetProcessEnvironmentBlock()->lpApiSetMap;
 
     for (dwEntryCount = 0; dwEntryCount < pApiSetMap->Count; dwEntryCount++)
     {
-		pApiEntry = &pApiSetMap->Array[dwEntryCount];
-		wsEntry = (PWSTR)((PCHAR)pApiSetMap + pApiEntry->NameOffset);
+        pApiEntry = &pApiSetMap->Array[dwEntryCount];
+        wsEntry = (PWSTR)((PCHAR)pApiSetMap + pApiEntry->NameOffset);
 
-		if (_wcsnicmp(wsEntry, wszVirtualModule, pApiEntry->NameLength / 2) != 0)
-			continue;
+        if (_wcsnicmp(wsEntry, wszVirtualModule, pApiEntry->NameLength / 2) != 0)
+            continue;
 
         pApiArray = (PAPI_SET_VALUE_ARRAY_V2)((PCHAR)pApiSetMap + pApiEntry->DataOffset);
 
         for (dwSetCount = pApiArray->Count-1; dwSetCount >= 0; dwSetCount--)
         {
             pApiValue = &pApiArray->Array[dwSetCount];
-			wsName = (PWSTR)((PCHAR)pApiSetMap + pApiValue->NameOffset);
-			wsValue = (PWSTR)((PCHAR)pApiSetMap + pApiValue->ValueOffset);
-			
-			if (pApiValue->NameLength == 0 || _wcsnicmp(wsName, wszImportingModule, pApiValue->NameLength / 2) == 0)
-			{
-				*stSize = pApiValue->ValueLength / 2;
-				return wsValue;
-			}
+            wsName = (PWSTR)((PCHAR)pApiSetMap + pApiValue->NameOffset);
+            wsValue = (PWSTR)((PCHAR)pApiSetMap + pApiValue->ValueOffset);
+
+            if (pApiValue->NameLength == 0 || _wcsnicmp(wsName, wszImportingModule, pApiValue->NameLength / 2) == 0)
+            {
+                *stSize = pApiValue->ValueLength / 2;
+                return wsValue;
+            }
         }
     }
     return NULL;

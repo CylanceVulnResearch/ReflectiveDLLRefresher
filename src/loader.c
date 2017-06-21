@@ -8,7 +8,7 @@ void RefreshPE()
 {
     HMODULE hModule;
     PWSTR wszFullDllName;
-	PWSTR wszBaseDllName;
+    PWSTR wszBaseDllName;
     ULONG_PTR pDllBase;
 
     PLDR_DATA_TABLE_ENTRY pLdteHead = NULL;
@@ -69,12 +69,12 @@ HMODULE CustomLoadLibrary(const PWCHAR wszFullDllName, const PWCHAR wszBaseDllNa
     // Import
     PIMAGE_IMPORT_DESCRIPTOR pImportDesc;
     PCHAR szDllName;
-	SIZE_T stDllName;
-	PWSTR wszDllName = NULL;
-	PWCHAR wsRedir = NULL;
-	PWSTR wszRedirName = NULL;
-	SIZE_T stRedirName;
-	SIZE_T stSize;
+    SIZE_T stDllName;
+    PWSTR wszDllName = NULL;
+    PWCHAR wsRedir = NULL;
+    PWSTR wszRedirName = NULL;
+    SIZE_T stRedirName;
+    SIZE_T stSize;
 
     HMODULE hModule;
     PIMAGE_THUNK_DATA pThunkData;
@@ -88,16 +88,16 @@ HMODULE CustomLoadLibrary(const PWCHAR wszFullDllName, const PWCHAR wszBaseDllNa
     OUTPUTDBGA("\n");
 
     hFile = CreateFileW(wszFullDllName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hFile == INVALID_HANDLE_VALUE)
-		goto cleanup;
+    if (hFile == INVALID_HANDLE_VALUE)
+        goto cleanup;
 
     hMap = CreateFileMappingW(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
     if (hMap == NULL)
-		goto cleanup;
+        goto cleanup;
 
     pFile = (PCHAR)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
-	if (pFile == NULL)
-		goto cleanup;
+    if (pFile == NULL)
+        goto cleanup;
 
     // ----
     // Step 2: Parse the file headers and load it into memory
@@ -115,7 +115,7 @@ HMODULE CustomLoadLibrary(const PWCHAR wszFullDllName, const PWCHAR wszBaseDllNa
 
     // copy sections
     OUTPUTDBGA("\t[+] Copying PE sections into memory\n");
-	pSectionHeader = (PIMAGE_SECTION_HEADER)(pFile + pDosHeader->e_lfanew + sizeof(IMAGE_NT_HEADERS));
+    pSectionHeader = (PIMAGE_SECTION_HEADER)(pFile + pDosHeader->e_lfanew + sizeof(IMAGE_NT_HEADERS));
     for (dwIdx = 0; dwIdx < pNtHeader->FileHeader.NumberOfSections; dwIdx++)
     {
         memcpy(pLibraryAddr + pSectionHeader[dwIdx].VirtualAddress,
@@ -204,43 +204,43 @@ HMODULE CustomLoadLibrary(const PWCHAR wszFullDllName, const PWCHAR wszBaseDllNa
         while (pImportDesc->Characteristics)
         {
             hModule = NULL;
-			wszDllName = NULL;
+            wszDllName = NULL;
             szDllName = (PCHAR)(pLibraryAddr + pImportDesc->Name);
-			stDllName = strnlen(szDllName, MAX_PATH);
-			wszDllName = (PWSTR)calloc(stDllName + 1, sizeof(WCHAR));
+            stDllName = strnlen(szDllName, MAX_PATH);
+            wszDllName = (PWSTR)calloc(stDllName + 1, sizeof(WCHAR));
 
-			if (wszDllName == NULL)
-				goto next_import;
+            if (wszDllName == NULL)
+                goto next_import;
 
-			mbstowcs_s(&stSize, wszDllName, stDllName + 1, szDllName, stDllName);
+            mbstowcs_s(&stSize, wszDllName, stDllName + 1, szDllName, stDllName);
 
             OUTPUTDBGA("\t\t[+] Loading library: ");
             OUTPUTDBGW(wszDllName);
             OUTPUTDBGA("\n");
 
             // If the DLL starts with api- or ext-, resolve the redirected name and load it
-			if (_wcsnicmp(wszDllName, L"api-", 4) == 0 || _wcsnicmp(wszDllName, L"ext-", 4) == 0)
+            if (_wcsnicmp(wszDllName, L"api-", 4) == 0 || _wcsnicmp(wszDllName, L"ext-", 4) == 0)
             {
-				// wsRedir is not null terminated
-				wsRedir = GetRedirectedName(wszBaseDllName, wszDllName, &stRedirName);
+                // wsRedir is not null terminated
+                wsRedir = GetRedirectedName(wszBaseDllName, wszDllName, &stRedirName);
                 if (wsRedir)
                 {
-					// Free the original wszDllName and allocate a new buffer for the redirected dll name
-					free(wszDllName);
-					wszDllName = (PWSTR)calloc(stRedirName + 1, sizeof(WCHAR));
-					if (wszDllName == NULL)
-						goto next_import;
+                    // Free the original wszDllName and allocate a new buffer for the redirected dll name
+                    free(wszDllName);
+                    wszDllName = (PWSTR)calloc(stRedirName + 1, sizeof(WCHAR));
+                    if (wszDllName == NULL)
+                        goto next_import;
 
-					memcpy(wszDllName, wsRedir, stRedirName * sizeof(WCHAR));
+                    memcpy(wszDllName, wsRedir, stRedirName * sizeof(WCHAR));
                 }
             }
 
-			// Load the module
+            // Load the module
             hModule = CustomGetModuleHandleW(wszDllName);
 
             // Ignore libraries that fail to load
             if (hModule == NULL)
-				goto next_import;
+                goto next_import;
 
             if (pImportDesc->OriginalFirstThunk)
                 pThunkData = (PIMAGE_THUNK_DATA)(pLibraryAddr + pImportDesc->OriginalFirstThunk);
@@ -250,7 +250,7 @@ HMODULE CustomLoadLibrary(const PWCHAR wszFullDllName, const PWCHAR wszBaseDllNa
             pIatEntry = (FARPROC*)(pLibraryAddr + pImportDesc->FirstThunk);
 
             // loop through each thunk and resolve the import
-			for(; DEREF(pThunkData); pThunkData++, pIatEntry++)
+            for(; DEREF(pThunkData); pThunkData++, pIatEntry++)
             {
                 if (IMAGE_SNAP_BY_ORDINAL(pThunkData->u1.Ordinal))
                     *pIatEntry = CustomGetProcAddressEx(hModule, (PCHAR)IMAGE_ORDINAL(pThunkData->u1.Ordinal), wszDllName);
@@ -259,105 +259,105 @@ HMODULE CustomLoadLibrary(const PWCHAR wszFullDllName, const PWCHAR wszBaseDllNa
             }
 
 next_import:
-			if (wszDllName != NULL)
-			{
-				free(wszDllName);
-				wszDllName = NULL;
-			}
+            if (wszDllName != NULL)
+            {
+                free(wszDllName);
+                wszDllName = NULL;
+            }
             pImportDesc = (PIMAGE_IMPORT_DESCRIPTOR)((PCHAR)pImportDesc + sizeof(IMAGE_IMPORT_DESCRIPTOR));
 
         }
     }
 
 cleanup:
-	if (pFile != NULL)
-		UnmapViewOfFile(pFile);
-	if (hMap != NULL)
-		CloseHandle(hMap);
-	if (hFile != INVALID_HANDLE_VALUE)
-		CloseHandle(hFile);
+    if (pFile != NULL)
+        UnmapViewOfFile(pFile);
+    if (hMap != NULL)
+        CloseHandle(hMap);
+    if (hFile != INVALID_HANDLE_VALUE)
+        CloseHandle(hFile);
 
     return (HMODULE) pLibraryAddr;
 }
 
 HMODULE CustomGetModuleHandleW(const PWSTR wszModule)
 {
-	HMODULE hModule = NULL;
-	PLDR_DATA_TABLE_ENTRY pLdteHead = NULL;
-	PLDR_DATA_TABLE_ENTRY pLdteCurrent = NULL;
+    HMODULE hModule = NULL;
+    PLDR_DATA_TABLE_ENTRY pLdteHead = NULL;
+    PLDR_DATA_TABLE_ENTRY pLdteCurrent = NULL;
 
-	OUTPUTDBGA("\t\t\t[*] Searching for loaded module: ");
-	OUTPUTDBGW(wszModule);
-	OUTPUTDBGA(" -> ");
+    OUTPUTDBGA("\t\t\t[*] Searching for loaded module: ");
+    OUTPUTDBGW(wszModule);
+    OUTPUTDBGA(" -> ");
 
-	pLdteCurrent = pLdteHead = GetInMemoryOrderModuleList();
+    pLdteCurrent = pLdteHead = GetInMemoryOrderModuleList();
 
-	do {
-		if (pLdteCurrent->FullDllName.Length > 2 &&
-			_wcsnicmp(wszModule, pLdteCurrent->BaseDllName.pBuffer, pLdteCurrent->BaseDllName.Length / 2) == 0)
-		{
-			OUTPUTDBGA("found in memory\n");
-			return ((HMODULE)pLdteCurrent->DllBase);
-		}
-		pLdteCurrent = (PLDR_DATA_TABLE_ENTRY)pLdteCurrent->InMemoryOrderModuleList.Flink;
-	} while (pLdteCurrent != pLdteHead);
+    do {
+        if (pLdteCurrent->FullDllName.Length > 2 &&
+            _wcsnicmp(wszModule, pLdteCurrent->BaseDllName.pBuffer, pLdteCurrent->BaseDllName.Length / 2) == 0)
+        {
+            OUTPUTDBGA("found in memory\n");
+            return ((HMODULE)pLdteCurrent->DllBase);
+        }
+        pLdteCurrent = (PLDR_DATA_TABLE_ENTRY)pLdteCurrent->InMemoryOrderModuleList.Flink;
+    } while (pLdteCurrent != pLdteHead);
 
-	OUTPUTDBGA("loading from disk\n");
-	return LoadLibraryW(wszModule);
+    OUTPUTDBGA("loading from disk\n");
+    return LoadLibraryW(wszModule);
 }
 
 VOID ScanAndFixModule(PCHAR pKnown, PCHAR pSuspect, PWCHAR wszBaseDllName)
 {
-	// PE headers
-	PIMAGE_DOS_HEADER pDosHeader;
-	PIMAGE_NT_HEADERS pNtHeader;
-	PIMAGE_SECTION_HEADER pSectionHeader;
+    // PE headers
+    PIMAGE_DOS_HEADER pDosHeader;
+    PIMAGE_NT_HEADERS pNtHeader;
+    PIMAGE_SECTION_HEADER pSectionHeader;
 
-	DWORD dwIdx;
+    DWORD dwIdx;
 
-	OUTPUTDBGA("[*] Scanning module: ");
-	OUTPUTDBGW(wszBaseDllName);
-	OUTPUTDBGA("\n");
+    OUTPUTDBGA("[*] Scanning module: ");
+    OUTPUTDBGW(wszBaseDllName);
+    OUTPUTDBGA("\n");
 
-	pDosHeader = (PIMAGE_DOS_HEADER)pKnown;
-	pNtHeader = (PIMAGE_NT_HEADERS)(pKnown + pDosHeader->e_lfanew);
+    pDosHeader = (PIMAGE_DOS_HEADER)pKnown;
+    pNtHeader = (PIMAGE_NT_HEADERS)(pKnown + pDosHeader->e_lfanew);
 
-	// Scan PE header
-	ScanAndFixSection("Header", pKnown, pSuspect, pNtHeader->OptionalHeader.SizeOfHeaders);
+    // Scan PE header
+    ScanAndFixSection("Header", pKnown, pSuspect, pNtHeader->OptionalHeader.SizeOfHeaders);
 
-	// Scan each section
-	pSectionHeader = (PIMAGE_SECTION_HEADER)(pKnown + pDosHeader->e_lfanew + sizeof(IMAGE_NT_HEADERS));
-	for (dwIdx = 0; dwIdx < pNtHeader->FileHeader.NumberOfSections; dwIdx++)
-	{
+    // Scan each section
+    pSectionHeader = (PIMAGE_SECTION_HEADER)(pKnown + pDosHeader->e_lfanew + sizeof(IMAGE_NT_HEADERS));
+    for (dwIdx = 0; dwIdx < pNtHeader->FileHeader.NumberOfSections; dwIdx++)
+    {
 
-		// Skip writable sections
-		if (pSectionHeader[dwIdx].Characteristics & IMAGE_SCN_MEM_WRITE)
-			continue;
+        // Skip writable sections
+        if (pSectionHeader[dwIdx].Characteristics & IMAGE_SCN_MEM_WRITE)
+            continue;
 
-		ScanAndFixSection((PCHAR)pSectionHeader[dwIdx].Name, pKnown + pSectionHeader[dwIdx].VirtualAddress,
-			              pSuspect + pSectionHeader[dwIdx].VirtualAddress, pSectionHeader[dwIdx].Misc.VirtualSize);
-	}
+        ScanAndFixSection((PCHAR)pSectionHeader[dwIdx].Name, pKnown + pSectionHeader[dwIdx].VirtualAddress,
+                          pSuspect + pSectionHeader[dwIdx].VirtualAddress, pSectionHeader[dwIdx].Misc.VirtualSize);
+    }
 }
 
 VOID ScanAndFixSection(PCHAR szSectionName, PCHAR pKnown, PCHAR pSuspect, size_t stLength)
 {
-	DWORD ddOldProtect;
+    DWORD ddOldProtect;
 
-	if (memcmp(pKnown, pSuspect, stLength) != 0)
-	{
-		OUTPUTDBGA("\t[!] Found modification in: ");
-		OUTPUTDBGA(szSectionName);
-		OUTPUTDBGA("\n");
+    if (memcmp(pKnown, pSuspect, stLength) != 0)
+    {
+        OUTPUTDBGA("\t[!] Found modification in: ");
+        OUTPUTDBGA(szSectionName);
+        OUTPUTDBGA("\n");
 
-		if (!VirtualProtect(pSuspect, stLength, PAGE_EXECUTE_READWRITE, &ddOldProtect))
-			return;
+        if (!VirtualProtect(pSuspect, stLength, PAGE_EXECUTE_READWRITE, &ddOldProtect))
+            return;
 
-		OUTPUTDBGA("\t[+] Copying known good section into memory.\n");
-		memcpy(pSuspect, pKnown, stLength);
+        OUTPUTDBGA("\t[+] Copying known good section into memory.\n");
+        memcpy(pSuspect, pKnown, stLength);
 
-		if (!VirtualProtect(pSuspect, stLength, ddOldProtect, &ddOldProtect))
-			OUTPUTDBGA("\t[!] Failed to reset memory permissions.\n");
-	}
+        if (!VirtualProtect(pSuspect, stLength, ddOldProtect, &ddOldProtect))
+            OUTPUTDBGA("\t[!] Failed to reset memory permissions.\n");
+    }
 }
 
 
@@ -396,14 +396,14 @@ FARPROC WINAPI CustomGetProcAddressEx(HMODULE hModule, const PCHAR lpProcName, P
     UINT_PTR uiNameArray = 0;
     UINT_PTR uiNameOrdinals = 0;
     UINT_PTR uiFuncVA = 0;
-	PCHAR cpExportedFunctionName;
+    PCHAR cpExportedFunctionName;
     PCHAR szFwdDesc;
     PCHAR szRedirFunc;
-	PWSTR wszDllName;
-	SIZE_T stDllName;
-	PWCHAR wsRedir;
-	PWSTR wszRedirName = NULL;
-	SIZE_T stRedirName;
+    PWSTR wszDllName;
+    SIZE_T stDllName;
+    PWCHAR wsRedir;
+    PWSTR wszRedirName = NULL;
+    SIZE_T stRedirName;
 
     HMODULE hFwdModule;
     PIMAGE_NT_HEADERS pNtHeaders = NULL;
@@ -436,13 +436,13 @@ FARPROC WINAPI CustomGetProcAddressEx(HMODULE hModule, const PCHAR lpProcName, P
     uiNameOrdinals = (uiLibraryAddress + pExportDirectory->AddressOfNameOrdinals);
 
     // test if we are importing by name or by ordinal...
-	#pragma warning(suppress: 4311)
+    #pragma warning(suppress: 4311)
     if (((DWORD)lpProcName & 0xFFFF0000) == 0x00000000)
     {
         // import by ordinal...
 
         // use the import ordinal (- export ordinal base) as an index into the array of addresses
-		#pragma warning(suppress: 4311)
+        #pragma warning(suppress: 4311)
         uiAddressArray += ((IMAGE_ORDINAL((DWORD)lpProcName) - pExportDirectory->Base) * sizeof(DWORD));
 
         // resolve the address for this imported function
@@ -472,38 +472,38 @@ FARPROC WINAPI CustomGetProcAddressEx(HMODULE hModule, const PCHAR lpProcName, P
                     OUTPUTDBGA(szFwdDesc);
                     OUTPUTDBGA("\n");
 
-					// Find the first character after "."
-					szRedirFunc = strstr(szFwdDesc, ".") + 1;
-					stDllName = (SIZE_T)(szRedirFunc - szFwdDesc);
+                    // Find the first character after "."
+                    szRedirFunc = strstr(szFwdDesc, ".") + 1;
+                    stDllName = (SIZE_T)(szRedirFunc - szFwdDesc);
 
-					// Allocate enough space to append "dll"
-					wszDllName = (PWSTR)calloc(stDllName + 3 + 1, sizeof(WCHAR));
-					if (wszDllName == NULL)
-						break;
+                    // Allocate enough space to append "dll"
+                    wszDllName = (PWSTR)calloc(stDllName + 3 + 1, sizeof(WCHAR));
+                    if (wszDllName == NULL)
+                        break;
 
-					mbstowcs_s(NULL, wszDllName, stDllName + 1, szFwdDesc, stDllName);
-					memcpy(wszDllName + stDllName, L"dll", 3 * sizeof(WCHAR));
+                    mbstowcs_s(NULL, wszDllName, stDllName + 1, szFwdDesc, stDllName);
+                    memcpy(wszDllName + stDllName, L"dll", 3 * sizeof(WCHAR));
 
                     // check for a redirected module name
                     if (_wcsnicmp(wszDllName, L"api-", 4) == 0 || _wcsnicmp(wszDllName, L"ext-", 4) == 0)
                     {
-						wsRedir = GetRedirectedName(wszOriginalModule, wszDllName, &stRedirName);
+                        wsRedir = GetRedirectedName(wszOriginalModule, wszDllName, &stRedirName);
                         if (wsRedir)
                         {
-							// Free the original buffer and allocate a new one for the redirected dll name
-							free(wszDllName);
+                            // Free the original buffer and allocate a new one for the redirected dll name
+                            free(wszDllName);
 
-							wszDllName = (PWSTR)calloc(stRedirName + 1, sizeof(WCHAR));
-							if (wszDllName == NULL)
-								break;
+                            wszDllName = (PWSTR)calloc(stRedirName + 1, sizeof(WCHAR));
+                            if (wszDllName == NULL)
+                                break;
 
-							memcpy(wszDllName, wsRedir, stRedirName * sizeof(WCHAR));
+                            memcpy(wszDllName, wsRedir, stRedirName * sizeof(WCHAR));
                         }
                     }
 
-					hFwdModule = GetModuleHandleW(wszDllName);
-					fpResult = CustomGetProcAddressEx(hFwdModule, szRedirFunc, wszDllName);
-					free(wszDllName);
+                    hFwdModule = GetModuleHandleW(wszDllName);
+                    fpResult = CustomGetProcAddressEx(hFwdModule, szRedirFunc, wszDllName);
+                    free(wszDllName);
                 }
                 else
                 {
