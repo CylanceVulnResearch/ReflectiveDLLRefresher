@@ -74,7 +74,7 @@ PWCHAR GetRedirectedName_V6(const PWSTR wszImportingModule, const PWSTR wszVirtu
     PAPI_SET_VALUE_ENTRY_V6 pApiValue;
     PAPI_SET_VALUE_ENTRY_V6 pApiArray;
     DWORD dwEntryCount;
-    DWORD dwSetCount;
+    LONG dwSetCount;
     PWSTR wsEntry;
     PWSTR wsName;
     PWSTR wsValue;
@@ -120,7 +120,7 @@ PWCHAR GetRedirectedName_V4(const PWSTR wszImportingModule, const PWSTR wszVirtu
     PAPI_SET_VALUE_ARRAY_V4 pApiArray;
     PAPI_SET_VALUE_ENTRY_V4 pApiValue;
     DWORD dwEntryCount;
-    DWORD dwSetCount;
+    LONG dwSetCount;
     PWSTR wsEntry;
     PWSTR wsName;
     PWSTR wsValue;
@@ -160,7 +160,7 @@ PWCHAR GetRedirectedName_V2(const PWSTR wszImportingModule, const PWSTR wszVirtu
     PAPI_SET_VALUE_ARRAY_V2 pApiArray;
     PAPI_SET_VALUE_ENTRY_V2 pApiValue;
     DWORD dwEntryCount;
-    DWORD dwSetCount;
+    LONG dwSetCount;
     PWSTR wsEntry;
     PWSTR wsName;
     PWSTR wsValue;
