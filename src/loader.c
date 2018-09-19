@@ -145,8 +145,8 @@ HMODULE CustomLoadLibrary(const PWCHAR wszFullDllName, const PWCHAR wszBaseDllNa
         pBaseReloc = (PIMAGE_BASE_RELOCATION)(pLibraryAddr + pDataDir->VirtualAddress);
 
         // iterate through each relocation entry
-        while (pBaseReloc->SizeOfBlock)
-        {
+		while ((PCHAR)pBaseReloc < (pLibraryAddr + pDataDir->VirtualAddress + pDataDir->Size) && pBaseReloc->SizeOfBlock)
+		{
             // the VA for this relocation block
             pReloc = (ULONG_PTR)(pLibraryAddr + pBaseReloc->VirtualAddress);
 
